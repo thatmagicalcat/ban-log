@@ -1,6 +1,3 @@
-use std::fs;
-use std::time::Duration;
-
 use serenity::builder::CreateEmbed;
 use serenity::model::prelude::Embed;
 use serenity::utils::{Colour, EmbedMessageBuilding};
@@ -9,6 +6,8 @@ use serenity::{
     model::prelude::{Guild, GuildChannel, Message, Ready},
     prelude::{Context, EventHandler},
 };
+use std::fs;
+use std::time::Duration;
 
 use crate::FILE_PATH;
 
@@ -43,23 +42,23 @@ impl EventHandler for Handler {
                 last_write_time = current_write_time;
 
                 let contents = fs::read_to_string(FILE_PATH).expect("Failed to read file");
-                let line = &contents[pre_contents.len()..].trim();
-
-                // function
-                let split = line.split('%').collect::<Vec<_>>();
-                log_channel
-                    .send_message(&ctx, |m| {
-                        m.embed(|f| {
-                            f.title("BAN-LOG")
-                                .field("IP:", format!("`{}`", split[0]), true)
-                                .field("Player:", format!("`{}`", split[1]), true)
-                                .field("Reason:", format!("`{}`", split[2]), true)
-                                .field("Admin:", format!("`{}`", split[3]), true)
-                                .color(Colour::RED)
+                if let Some(line) = contents.get(pre_contents.len()..) {
+                    // function
+                    let split = line.split('%').collect::<Vec<_>>();
+                    log_channel
+                        .send_message(&ctx, |m| {
+                            m.embed(|f| {
+                                f.title("BAN-LOG")
+                                    .field("IP:", format!("`{}`", split[0]), true)
+                                    .field("Player:", format!("`{}`", split[1]), true)
+                                    .field("Reason:", format!("`{}`", split[2]), true)
+                                    .field("Admin:", format!("`{}`", split[3]), true)
+                                    .color(Colour::RED)
+                            })
                         })
-                    })
-                    .await
-                    .unwrap();
+                        .await
+                        .unwrap();
+                }
 
                 pre_contents = contents;
             }
